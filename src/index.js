@@ -35,6 +35,9 @@ client.on('interactionCreate', (interaction) => {
   if (interaction.commandName === 'test') {
     interaction.reply('test');
   }
+  if (interaction.commandName === 'getCourses') {
+    interaction.reply('test');
+  }
 });
 
 
