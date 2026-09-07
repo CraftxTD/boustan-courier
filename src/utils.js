@@ -59,9 +59,43 @@ function isCourse(role) {
   return false;
 }
 
+/**
+  * @param {string} CRNs
+  */
+function splitCRNs(CRNs) {
+  const arr = CRNs.split(" ");
+  for (let CRN of arr) {
+    for (let c of CRN) {
+      if (c < '0' || '9' < c) {
+        return;
+      }
+    }
+  }
+  return arr;
+}
+
+/**
+  * @param {string} course
+  */
+function removeSpace(course) {
+  return course.split(' ').join('');
+}
+
+/**
+  * @param {string} course
+  */
+function addSpace(course) {
+  return course.slice(0, 4) + ' ' + course.slice(4)
+}
+
+
+
 module.exports = {
   getRandomInt,
   toLowerCase,
   findString,
-  isCourse
+  isCourse,
+  splitCRNs,
+  removeSpace,
+  addSpace
 };

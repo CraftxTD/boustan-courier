@@ -4,8 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, IntentsBitField, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
 
-const utils = require("./utils")
-const event = require("./events")
+const utils = require("./utils");
+const event = require("./events");
 
 const client = new Client({
   intents: [
