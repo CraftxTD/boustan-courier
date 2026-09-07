@@ -11,10 +11,12 @@ function toLowerCase(str) {
 /**
   * @param {string} word 
   * @param {string} text 
+  * @param {number} limit 
   */
-function findString(text, word) {
+function findString(text, word, limit) {
   text = text.toLowerCase();
-  for (let i = 0; i < text.length; i++) {
+  let length = Math.min(limit, text.length);
+  for (let i = 0; i < length; i++) {
     if (word.startsWith(text[i])) {
       i++;
       for (let j = 1; j < word.length; j++, i++) {
@@ -47,10 +49,10 @@ function isCourse(role) {
   if (subject == "COMP"
     || subject == "MATH"
     || subject == "BIOL"
+    || subject == "PHYS"
+    || subject == "LING"
     || subject == "CHEM"
     || subject == "PSYC"
-    || subject == "ECON"
-    || subject == "PHYS"
     || subject == "ATOC") {
     return true;
   }

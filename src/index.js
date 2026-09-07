@@ -5,7 +5,7 @@ const path = require('node:path');
 const { Client, Collection, IntentsBitField, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
 
 const utils = require("./utils")
-const commands = require("./commands")
+const event = require("./events")
 
 const client = new Client({
   intents: [
@@ -47,10 +47,10 @@ client.on('messageCreate', (message) => {
   }
 
   // greet if called
-  if (utils.findString(message.content, "courier")) {
+  if (utils.findString(message.content, "courier", 100)) {
     let num = utils.getRandomInt(0, 9);
     console.log("Called:", num);
-    message.reply(commands.greet());
+    message.reply(event.greet());
   }
 });
 
