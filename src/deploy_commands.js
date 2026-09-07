@@ -6,14 +6,33 @@ const { REST, Routes } = require('discord.js');
 
 const commands = [];
 
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+const foldersPath = path.join(__dirname, 'commands');
+const commandFolders = fs.readdirSync(foldersPath);
 
-for (const file of commandFiles) {
-  const filePath = path.join(commandsPath, file);
-  const command = require(filePath);
+for (const folder of commandFolders) {
+  const commandsPath = path.join(foldersPath, folder);
 
-  commands.push(command.data.toJSON ? command.data.toJSON() : command.data);
+  const commandFiles = fs.readdirSync(commandsPath)
+    .filter(file => file.endsWith('.js'));
+
+  for (const file of commandFiles) {
+    const filePath = path.join(commandsPath, file);
+    const command = require(filePath);
+
+    if ('data' in command && 'execute' in command) {
+      commands.push(
+        command.data.toJSON()
+      );
+    } else {
+      console.log(
+        `[WARNING] ${filePath} is missing "data" or "execute".`
+      );
+    }
+  }
+}
+
+for (const command of commands) {
+  console.log(command.name);
 }
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);

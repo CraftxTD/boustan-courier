@@ -29,8 +29,37 @@ function findString(text, word) {
   return false;
 }
 
+/**
+  * @param {string} role 
+  */
+function isCourse(role) {
+  let subject = "";
+  for (let i = 0; i < 4; i++) {
+    if (role[i] < 'A' || role[i] > 'Z') {
+      return false;
+    } else if (role[i] == ' ') {
+      break;
+    }
+    subject += role[i];
+  }
+  if (subject.length < 4) return false;
+
+  if (subject == "COMP"
+    || subject == "MATH"
+    || subject == "BIOL"
+    || subject == "CHEM"
+    || subject == "PSYC"
+    || subject == "ECON"
+    || subject == "PHYS"
+    || subject == "ATOC") {
+    return true;
+  }
+  return false;
+}
+
 module.exports = {
   getRandomInt,
   toLowerCase,
-  findString
+  findString,
+  isCourse
 };

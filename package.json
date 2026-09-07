@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "register": "node src/register_commands.js"
+    "register": "node src/deploy_commands.js"
   },
   "keywords": [],
   "author": "CraftxTD",
