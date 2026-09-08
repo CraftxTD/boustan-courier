@@ -31,8 +31,16 @@ async function test_getCourses() {
   console.timeEnd("getCourses");
 }
 
+async function test_checkCourse() {
+  let course = "COMP206";
+  let term = "Fall 2026";
+  const c = await mcgill.checkCourse(course, term);
+  console.log(c);
+
+}
+
 console.log("Starting testing..")
 // test_getCourseInfo()
 // test_getCourse();
-test_getCourses();
-
+// test_getCourses();
+test_checkCourse();

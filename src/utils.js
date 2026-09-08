@@ -1,9 +1,16 @@
 // @ts-check
 
+/**
+  * @param {number} min 
+  * @param {number} max 
+  */
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+  * @param {string} str 
+  */
 function toLowerCase(str) {
   return str.toLowerCase();
 }
@@ -93,8 +100,7 @@ function addSpace(course) {
 module.exports = {
   getRandomInt,
   toLowerCase,
-  findString,
-  isCourse,
+  findString, isCourse,
   splitCRNs,
   removeSpace,
   addSpace

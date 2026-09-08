@@ -1,3 +1,5 @@
+const utils = require("../utils.js");
+
 // @ts-check
 
 const BASE = "https://mcgill.courses/api";
@@ -66,9 +68,25 @@ async function getCourses(CRNs, term) {
   return arr;
 }
 
+/**
+  * @param {string} course 
+  * @param {string} term 
+  */
+async function checkCourse(course, term) {
+  course = utils.removeSpace(course);
+  const data = await getCourseInfo(course);
+  if (data) {
+    const termExists = data.course.terms.includes(term);
+    if (termExists) return true;
+  }
+  return false;
+}
+
+
 module.exports = {
   getCourseInfo,
   getCourse,
-  getCourses
+  getCourses,
+  checkCourse
 }
 
