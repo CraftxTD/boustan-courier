@@ -1,4 +1,36 @@
+const chroma = require("chroma-js");
+
+const { SlashCommandBuilder } = require("discord.js");
+
 // @ts-check
+
+/**
+  * #f20c0c (Red)
+  * #f2890c (Orange)
+  * #ddf20c (Yellow-Green)
+  * #60f20c (Green)
+  * #0cf236 (Mint Green)
+  * #0cf2b3 (Teal/Cyan)
+  * #0cb3f2 (Sky Blue)
+  * #0c36f2 (Royal Blue)
+  * #600cf2 (Violet/Indigo)
+  * #dd0cf2 (Magenta)
+  * #f20c89 (Hot Pink)
+  */
+
+const COURSES = Object.freeze({
+  COMP: { id: "COMP", color: "#f20c0c" },
+  BIOL: { id: "BIOL", color: "#f2890c" },
+  MATH: { id: "MATH", color: "#ddf20c" },
+  PHYS: { id: "PHYS", color: "#60f20c" },
+  LING: { id: "LING", color: "#0cf236" },
+  CHEM: { id: "CHEM", color: "#0cf2b3" },
+  PSYC: { id: "PSYC", color: "#0cb3f2" },
+  ATOC: { id: "ATOC", color: "#0c36f2" },
+  PHGY: { id: "PHGY", color: "#600cf2" },
+  NEUR: { id: "NEUR", color: "#dd0cf2" },
+  ANAT: { id: "ANAT", color: "#f20c89" },
+})
 
 /**
   * @param {number} min 
@@ -53,16 +85,10 @@ function isCourse(role) {
   }
   if (subject.length < 4) return false;
 
-  if (subject == "COMP"
-    || subject == "MATH"
-    || subject == "BIOL"
-    || subject == "PHYS"
-    || subject == "LING"
-    || subject == "CHEM"
-    || subject == "PSYC"
-    || subject == "ATOC") {
-    return true;
+  for (const course of Object.values(COURSES)) {
+    if (course.id == subject) return true;
   }
+
   return false;
 }
 
@@ -84,24 +110,41 @@ function splitCRNs(CRNs) {
 /**
   * @param {string} course
   */
-function removeSpace(course) {
-  return course.split(' ').join('');
-}
-
-/**
-  * @param {string} course
-  */
 function addSpace(course) {
   return course.slice(0, 4) + ' ' + course.slice(4)
 }
 
+/**
+  * Create the corresponding course role if it doesn't exist yet. 
+  * Course includes a space inbetween course key and course id
+  * @param {string} course
+  */
+async function createCourseRole(courseID) {
+  let course = message.guild.roles.cache.find(x => x.name === courseID);
+  if (!(typeof course === undefined)) return false;
+  let subject = courseID.slice(0, 4);
+  let id = parseInt(courseID);
+  let color;
+  for (const course of Object.values(COURSES)) {
+    if (course.id == subject) {
+      let normal = -3 + 6 * (((id / 100) - 1) / 7);
+      color = normal < 0 ? chroma(course.color).darken(normal) : chroma(course.color).brighten(normal);
+      break;
+    }
+  }
+  if (!color) return false;
 
+  return await guild.roles.create({
+    name: `${subject} ${toString(id)}`,
+    color: `${color}`
+  });
+}
 
 module.exports = {
   getRandomInt,
   toLowerCase,
   findString, isCourse,
   splitCRNs,
-  removeSpace,
-  addSpace
+  addSpace,
+  createCourseRole
 };

@@ -69,11 +69,10 @@ async function getCourses(CRNs, term) {
 }
 
 /**
-  * @param {string} course 
+  * @param {(unconcatenated: string) => string} course 
   * @param {string} term 
   */
 async function checkCourse(course, term) {
-  course = utils.removeSpace(course);
   const data = await getCourseInfo(course);
   if (data) {
     const termExists = data.course.terms.includes(term);

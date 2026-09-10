@@ -34,7 +34,9 @@ async function test_getCourses() {
 async function test_checkCourse() {
   let course = "COMP206";
   let term = "Fall 2026";
-  const c = await mcgill.checkCourse(course, term);
+  const c = await mcgill.checkCourse(
+    course => course.split(' ').join(''),
+    term);
   console.log(c);
 
 }
