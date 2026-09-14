@@ -36,6 +36,8 @@ for (const command of commands) {
 }
 
 console.log(process.env.DISCORD_TOKEN);
+console.log(process.env.CLIENT_ID);
+console.log(process.env.GUILD_ID);
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
 (async () => {

@@ -21,6 +21,10 @@ module.exports = {
     .addSubcommand(sub => sub.setName('course_code')
       .setDescription('Add McGill courses by course code.')
       .addStringOption(option => option
+        .setName('term')
+        .setDescription('(Fall, Winter, or Summer). \n\n Example Format: Fall 2026')
+        .setRequired(true))
+      .addStringOption(option => option
         .setName('course_1')
         .setDescription('Example Format: \n\n MATH223 \n\n MATH 223')
         .setRequired(true))
@@ -44,10 +48,6 @@ module.exports = {
         .setName('course_6')
         .setDescription('Example Format: \n\n MATH223 \n\n MATH 223')
         .setRequired(false))
-      .addStringOption(option => option
-        .setName('term')
-        .setDescription('(Fall, Winter, or Summer). \n\n Example Format: Fall 2026')
-        .setRequired(true))
     ),
 
   async execute(interaction) {
