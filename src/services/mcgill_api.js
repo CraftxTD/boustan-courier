@@ -81,11 +81,21 @@ async function checkCourse(course, term) {
   return false;
 }
 
+/**
+  * @param {string} course 
+  */
+async function getCourseReviews(course) {
+  const response = await fetch(`${BASE}/reviews?course_id=${course}&sorted=${true}`);
+  const data = await response.json();
+  return data;
+}
+
 
 module.exports = {
   getCourseInfo,
   getCourse,
   getCourses,
-  checkCourse
+  checkCourse,
+  getCourseReviews
 }
 
