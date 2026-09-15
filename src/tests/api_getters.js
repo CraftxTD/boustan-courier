@@ -5,8 +5,8 @@ const utils = require("../utils");
 const mcgill = require("../services/mcgill_api");
 
 async function test_getCourseInfo() {
-  const c = await mcgill.getCourseInfo("COMP202");
-  console.log(c);
+  const c = await mcgill.getCourseInfo("LING331");
+  console.log(c.course.schedule);
 }
 
 async function test_getCourse() {
@@ -42,7 +42,7 @@ async function test_checkCourse() {
 }
 
 console.log("Starting testing..")
-// test_getCourseInfo()
+test_getCourseInfo();
 // test_getCourse();
+// test_checkCourse();
 // test_getCourses();
-test_checkCourse();

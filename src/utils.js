@@ -5,31 +5,40 @@ const { SlashCommandBuilder } = require("discord.js");
 // @ts-check
 
 /**
-  * #f20c0c (Red)
-  * #f2890c (Orange)
-  * #ddf20c (Yellow-Green)
-  * #60f20c (Green)
-  * #0cf236 (Mint Green)
-  * #0cf2b3 (Teal/Cyan)
-  * #0cb3f2 (Sky Blue)
-  * #0c36f2 (Royal Blue)
-  * #600cf2 (Violet/Indigo)
-  * #dd0cf2 (Magenta)
-  * #f20c89 (Hot Pink)
-  */
-
+ * #f20c0c Red
+ * #f26f0c Orange
+ * #f2d10c Yellow
+ * #b3f20c Yellow-green
+ * #51f20c Green
+ * #0cf22b Green
+ * #0cf28e Spring green
+ * #0cf2f0 Cyan
+ * #0c8ef2 Light blue
+ * #0c2bf2 Blue
+ * #510cf2 Violet
+ * #b30cf2 Purple
+ * #f20cd1 Magenta
+ * #f20c6f Pink
+ * #f20c89 Pink-red
+ * #f20c3d Red-pink
+*/
 const COURSES = Object.freeze({
   COMP: { id: "COMP", color: "#f20c0c" },
-  BIOL: { id: "BIOL", color: "#f2890c" },
-  MATH: { id: "MATH", color: "#ddf20c" },
-  PHYS: { id: "PHYS", color: "#60f20c" },
-  LING: { id: "LING", color: "#0cf236" },
-  CHEM: { id: "CHEM", color: "#0cf2b3" },
-  PSYC: { id: "PSYC", color: "#0cb3f2" },
-  ATOC: { id: "ATOC", color: "#0c36f2" },
-  PHGY: { id: "PHGY", color: "#600cf2" },
-  NEUR: { id: "NEUR", color: "#dd0cf2" },
-  ANAT: { id: "ANAT", color: "#f20c89" },
+  BIOL: { id: "BIOL", color: "#f26f0c" },
+  MATH: { id: "MATH", color: "#f2d10c" },
+  PHYS: { id: "PHYS", color: "#b3f20c" },
+  LING: { id: "LING", color: "#51f20c" },
+  CHEM: { id: "CHEM", color: "#0cf22b" },
+  PSYC: { id: "PSYC", color: "#0cf28e" },
+  ATOC: { id: "ATOC", color: "#0cf2f0" },
+  PHGY: { id: "PHGY", color: "#0c8ef2" },
+  NEUR: { id: "NEUR", color: "#0c2bf2" },
+  ANAT: { id: "ANAT", color: "#510cf2" },
+  ECON: { id: "ECON", color: "#b30cf2" },
+  ISLA: { id: "ISLA", color: "#f20cd1" },
+  FREN: { id: "FREN", color: "#f20c6f" },
+  ANTH: { id: "ANTH", color: "#f20c0c" },
+  GEOG: { id: "GEOG", color: "#f20c89" },
 })
 
 /**
@@ -96,15 +105,21 @@ function isCourse(role) {
   * @param {string} CRNs
   */
 function splitCRNs(CRNs) {
-  const arr = CRNs.split(" ");
+  const arr = CRNs.split(/\s+/);
+  let arr2 = [];
+  CRN:
   for (let CRN of arr) {
-    for (let c of CRN) {
+    if (CRN[0] === '(') {
+      continue;
+    }
+    for (const c of CRN) {
       if (c < '0' || '9' < c) {
-        return;
+        continue CRN;
       }
     }
+    arr2.push(CRN);
   }
-  return arr;
+  return arr2;
 }
 
 /**
@@ -115,28 +130,51 @@ function addSpace(course) {
 }
 
 /**
+  * @param {string} course
+  */
+function formatCourse(courseID) {
+  let arr = courseID.split(/\s+/);
+  if (arr.length < 2) {
+    return `${courseID.slice(0, 4)} ${courseID.slice(4, 7)}`;
+  }
+  return `${arr[0]} ${arr[1]}`;
+}
+
+/**
   * Create the corresponding course role if it doesn't exist yet. 
   * Course includes a space inbetween course key and course id
   * @param {string} course
   */
-async function createCourseRole(courseID) {
-  let course = message.guild.roles.cache.find(x => x.name === courseID);
-  if (!(typeof course === undefined)) return false;
+async function createCourseRole(interaction, courseID) {
+  let course = interaction.guild.roles.cache.find(
+    role => role.name === courseID
+  );
+  console.log(course);
+  if (course) return course;
   let subject = courseID.slice(0, 4);
-  let id = parseInt(courseID);
+  let id = parseInt(courseID.slice(5, 8));
+
   let color;
   for (const course of Object.values(COURSES)) {
     if (course.id == subject) {
+      if (id < 100) {
+        await interaction.followUp(`ERROR: ${courseID} is not a course.`)
+        break;
+      }
       let normal = -3 + 6 * (((id / 100) - 1) / 7);
-      color = normal < 0 ? chroma(course.color).darken(normal) : chroma(course.color).brighten(normal);
+      color = normal < 0 ? chroma(course.color).darken(normal).hex() : chroma(course.color).brighten(normal).hex();
       break;
     }
   }
-  if (!color) return false;
+  if (!color) {
+    return;
+  }
 
-  return await guild.roles.create({
-    name: `${subject} ${toString(id)}`,
-    color: `${color}`
+  return await interaction.guild.roles.create({
+    name: `${subject} ${id}`,
+    colors: {
+      primaryColor: color
+    }
   });
 }
 
@@ -146,5 +184,6 @@ module.exports = {
   findString, isCourse,
   splitCRNs,
   addSpace,
+  formatCourse,
   createCourseRole
 };
