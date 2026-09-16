@@ -20,7 +20,7 @@ function greet() {
 
     default:
       console.log("Positive");
-      num = utils.getRandomInt(0, 9);
+      num = utils.getRandomInt(0, 10);
       switch (num) {
         case 0:
           str = 'wassup';
@@ -51,6 +51,9 @@ function greet() {
           break;
         case 9:
           str = 'what';
+          break;
+        case 10:
+          str = ':3';
           break;
       }
       break;

@@ -12,6 +12,6 @@ module.exports = {
 
   async execute(interaction) {
     const user = interaction.options.getUser('user');
-    await interaction.reply(`Yo someone called ${user.username}`);
+    await interaction.reply(`:wave: Yo — someone called <@${user.id}>!`);
   },
 };
