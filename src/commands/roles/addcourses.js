@@ -53,13 +53,13 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
     const sub = interaction.options.getSubcommand();
-    const term = interaction.options.getString('term');
+    const term = utils.capitalizeString(interaction.options.getString('term'));
     const addedcourses = [];
     if (sub == "crn") {
       console.log("chose crn");
       const CRNs = interaction.options.getString('crn-s');
       console.log(CRNs);
-      const data = await mcgill.getCourses(interaction, utils.splitCRNs(CRNs), term);
+      const data = await mcgill.getCourses(utils.splitCRNs(CRNs), term);
       console.log("got courses");
       for (const course of data) {
         let role = await utils.createCourseRole(interaction, utils.formatCourse(course));
@@ -80,15 +80,15 @@ module.exports = {
         console.log(course);
         let role;
         if (course) {
-          formattedCourse = utils.formatCourse(course);
+          formattedCourse = utils.formatCourse(course.toUpperCase());
           console.log(parseInt(formattedCourse.slice(5, 8)));
           if (Number.isNaN(parseInt(formattedCourse.slice(5, 8)))) {
-            await interaction.followUp(`ERROR: ${course} is an invalid course format... Skipping..`);
+            await interaction.followUp(`${utils.returnError(0, course)}.. Skipping..`);
             continue;
           }
           let data = await mcgill.getCourseInfo(`${formattedCourse.slice(0, 4)}${formattedCourse.slice(5, 8)}`)
           if (!data) {
-            await interaction.followUp(`ERROR: ${course} doesn't exist... Skipping..`);
+            await interaction.followUp(`${utils.returnError(1, course)}.. Skipping..`);
             continue;
           }
           const hasTerm = data.course.schedule.find(
@@ -100,7 +100,7 @@ module.exports = {
               addedcourses.push(role);
             }
           } else {
-            await interaction.followUp(`WARNING: Skipping ${formattedCourse}. This course is not being offered for ${term}.\n\n`);
+            await interaction.followUp(`WARNING: ${utils.returnError(1, formattedCourse, term)}.. Skipping..`);
           }
         }
       }
@@ -115,7 +115,7 @@ module.exports = {
     if (addedcourses.length === 0) {
       await interaction.followUp(`:clipboard: No courses added to **${member.user.displayName}.`);
     } else {
-      await interaction.followUp(`:clipboard: Added the following roles to **${member.user.displayName}**: \n\n${addedcourses.map(course => course.name).join("   \n")}`);
+      await interaction.followUp(`:clipboard: Added the following courses to **${member.user.displayName}**: \n\n${addedcourses.map(course => course.name).join("   \n")}`);
     }
   },
 };

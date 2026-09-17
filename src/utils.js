@@ -42,6 +42,31 @@ const COURSES = Object.freeze({
 })
 
 /**
+  * @param {number} error 
+  * @param {string} course 
+  * @param {string} term 
+  */
+function returnError(error, course, term) {
+  let output;
+  switch (error) {
+    case 0:
+      output = `:x: **${course}** is an invalid course format.`;
+      break;
+    case 1:
+      output = `:x: **${course}** does not exist.`;
+      break;
+    case 2:
+      output = `:x: **${course}** does not have any reviews.`;
+      break;
+    case 3:
+      output = `:x: **${course}** isn't being offered for **${term}**`;
+      break;
+  }
+  return output;
+}
+
+
+/**
   * @param {number} min 
   * @param {number} max 
   */
@@ -178,6 +203,23 @@ async function createCourseRole(interaction, courseID) {
   });
 }
 
+/**
+  * Capitalize the start of every word in any given string.
+  * @param {string} phrase 
+  */
+function capitalizeString(phrase) {
+  phrase = phrase.toLowerCase();
+  let output = "";
+  for (let i = 0; i < phrase.length; i++) {
+    if (/^[a-z]$/.test(phrase[i])) {
+      output += i - 1 >= 0 && phrase[i - 1] === " " || i === 0 ? phrase[i].toUpperCase() : phrase[i];
+    } else {
+      output += phrase[i];
+    }
+  }
+  return output;
+}
+
 module.exports = {
   getRandomInt,
   toLowerCase,
@@ -185,5 +227,7 @@ module.exports = {
   splitCRNs,
   addSpace,
   formatCourse,
-  createCourseRole
+  createCourseRole,
+  capitalizeString,
+  returnError
 };

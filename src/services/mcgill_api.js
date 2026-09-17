@@ -40,7 +40,7 @@ async function getCourse(CRN, term) {
   * @param {Array} CRNs 
   * @param {string} term 
   */
-async function getCourses(interaction, CRNs, term) {
+async function getCourses(CRNs, term) {
   if (!CRNs) {
     return;
   }

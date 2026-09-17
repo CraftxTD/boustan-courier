@@ -4,8 +4,12 @@ const mcgill = require("../../services/mcgill_api")
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('coursereview')
-    .setDescription('Get a random course review for a given course')
+    .setName('getinstructor')
+    .setDescription('Get the instructors teaching a course for a given term')
+    .addStringOption(option => option
+      .setName('term')
+      .setDescription('(Fall, Winter, or Summer).\n\n EXAMPLE FORMAT: Fall 2026')
+      .setRequired(true))
     .addStringOption(option => option
       .setName('course')
       .setDescription('EXAMPLE FORMAT: \n\n MATH223 \n\n MATH 223')
@@ -14,28 +18,24 @@ module.exports = {
 
   async execute(interaction) {
     await interaction.deferReply();
+    const term = utils.capitalizeString(interaction.options.getString('term'));
     const course = utils.formatCourse(interaction.options.getString('course').toUpperCase());
     if (Number.isNaN(parseInt(course.slice(5, 8)))) {
       return await interaction.followUp(utils.returnError(0, course));
     }
-    const data = await mcgill.getCourseReviews(course.split(" ").join(""));
+    const data = await mcgill.getCourseInfo(course.split(" ").join(""));
     if (!data) {
       return await interaction.followUp(utils.returnError(1, course));
-
-    } else if (data.reviews.length === 0) {
-      return await interaction.followUp(utils.returnError(2, course));
     }
-    let random = utils.getRandomInt(0, data.reviews.length - 1);
-    let randReview = data.reviews[random];
-    console.log(randReview);
+    const instructor = data.course.instructors.find(
+      instructor => instructor.term.includes(term)
+    );
+    if (!instructor) {
+      return await interaction.followUp(utils.returnError(3, course, term));
+    }
 
     await interaction.followUp(`
-    :white_check_mark: Here's a random course review for **${course}**:
-      \n:teacher: **Instructors**: ${randReview.instructors.join(", ")}
-      \n:clipboard: **Review**:\n${randReview.content}
-      \n:fire: **Difficulty**: ${randReview.difficulty}
-      \n:star: **Rating**: ${randReview.rating}
-      \n:thumbsup: **Likes**: ${randReview.likes}
+    **${instructor.name}** is the **${course}** instructor for **${term}**.
       `);
   },
 };

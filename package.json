@@ -4,7 +4,7 @@
   "description": "A Discord Utility Bot for setting up McGill Course Roles in Discord",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node src/tests/api_getters.js",
     "register": "node src/deploy_commands.js"
   },
   "keywords": [],
