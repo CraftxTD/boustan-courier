@@ -3,7 +3,7 @@ const event = require("../../events");
 
 module.exports = {
   data: new ContextMenuCommandBuilder()
-    .setName('clone')
+    .setName('replace')
     .setType(ApplicationCommandType.Message)
     .setDefaultMemberPermissions(PermissionFlagsBits.kickMembers),
 
@@ -17,8 +17,10 @@ module.exports = {
         files: message.attachments
       }
     );
-    console.log(`Copied message.`);
+    console.log(`Replaced message.`);
 
+    await message.delete();
     await interaction.deleteReply();
   },
 }
+
