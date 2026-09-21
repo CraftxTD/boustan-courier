@@ -220,6 +220,16 @@ function capitalizeString(phrase) {
   return output;
 }
 
+
+/**
+  * @param {any} msgAttach 
+  */
+function attachIsImage(msgAttach) {
+}
+
+
+
+
 module.exports = {
   getRandomInt,
   toLowerCase,

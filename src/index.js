@@ -53,58 +53,35 @@ client.on('messageCreate', async (message) => {
     message.reply(event.greet());
   }
 
-  // find listdle images and spoiler them
+  // find listdle images and spoiler them, delete the previous message.
   if (message.channel.parent && message.channel.parent.name === "Listdle" && message.attachments.size > 0) {
-    let webhook;
+    await event.copycatMessage(
+      message,
+      {
+        content: message.content,
+        files: message.attachments.map(attachment =>
+          attachment.contentType?.startsWith("image/")
+            ? {
+              attachment: attachment.url,
+              name: `SPOILER_${attachment.name}`
+            }
+            : {
+              attachment: attachment.url,
+              name: attachment.name
+            }
+        )
+      }
+    );
 
-    try {
-      webhook = await message.client.fetchWebhook(
-        process.env.COPYCAT_ID,
-        process.env.COPYCAT_TOKEN,
-      );
-
-      console.log('Got CopyCat Webhook');
-    } catch (error) {
-      console.error(error);
-      console.log('COPYCAT WEBHOOK DOES NOT EXIST');
-      return;
-    }
-
-    await webhook.edit({
-      name: message.author.displayName,
-      avatar: message.author.displayAvatarURL(),
-      channel: message.channelId
-    })
-      .then(console.log(`Copied user's avatar and name`))
-      .catch(console.error);
-
-    await webhook.send({
-      content: message.content,
-      files: message.attachments.map(attachment =>
-        attachment.contentType?.startsWith("image/")
-          ? {
-            attachment: attachment.url,
-            name: `SPOILER_${attachment.name}`
-          }
-          : {
-            attachment: attachment.url,
-            name: attachment.name
-          }
-      )
-    })
-
-    await webhook.edit({
-      name: "CopyCat",
-      avatar: fs.readFileSync(process.env.COPYCAT_PICTURE)
-    })
-      .then((webhook) => console.log(`Edited to user webhook ${webhook}`))
-      .catch(console.error);
     await message.delete();
   }
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
+  if (!interaction.isChatInputCommand() &&
+    !interaction.isMessageContextMenuCommand() &&
+    !interaction.isUserContextMenuCommand()
+  ) return;
   const command = interaction.client.commands.get(interaction.commandName);
 
   if (!command) {
