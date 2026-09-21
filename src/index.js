@@ -41,7 +41,7 @@ for (const folder of commandFolders) {
   }
 }
 
-client.on('messageCreate', (message) => {
+client.on('messageCreate', async (message) => {
   if (message.author.bot) {
     return;
   }
@@ -51,6 +51,55 @@ client.on('messageCreate', (message) => {
     let num = utils.getRandomInt(0, 9);
     console.log("Called:", num);
     message.reply(event.greet());
+  }
+
+  // find listdle images and spoiler them
+  if (message.channel.parent && message.channel.parent.name === "Listdle" && message.attachments.size > 0) {
+    let webhook;
+
+    try {
+      webhook = await message.client.fetchWebhook(
+        process.env.COPYCAT_ID,
+        process.env.COPYCAT_TOKEN,
+      );
+
+      console.log('Got CopyCat Webhook');
+    } catch (error) {
+      console.error(error);
+      console.log('COPYCAT WEBHOOK DOES NOT EXIST');
+      return;
+    }
+
+    await webhook.edit({
+      name: message.author.displayName,
+      avatar: message.author.displayAvatarURL(),
+      channel: message.channelId
+    })
+      .then(console.log(`Copied user's avatar and name`))
+      .catch(console.error);
+
+    await webhook.send({
+      content: message.content,
+      files: message.attachments.map(attachment =>
+        attachment.contentType?.startsWith("image/")
+          ? {
+            attachment: attachment.url,
+            name: `SPOILER_${attachment.name}`
+          }
+          : {
+            attachment: attachment.url,
+            name: attachment.name
+          }
+      )
+    })
+
+    await webhook.edit({
+      name: "CopyCat",
+      avatar: fs.readFileSync(process.env.COPYCAT_PICTURE)
+    })
+      .then((webhook) => console.log(`Edited to user webhook ${webhook}`))
+      .catch(console.error);
+    await message.delete();
   }
 });
 
