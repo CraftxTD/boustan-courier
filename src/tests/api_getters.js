@@ -12,6 +12,11 @@ function testCapitalize() {
   console.log(utils.capitalizeString("SDFLKAJ aSDFlkj bbsdrfSERF 20234"));
 }
 
+function testGetString() {
+  console.log(utils.findString("to be or not to be — that is the question.", "—", 100));
+  console.log(utils.findString("to be or not to be, that is the question.", "—", 100));
+}
+
 async function test_getCourseInfo() {
   const c = await mcgill.getCourseInfo("ISLA423D2");
   console.log(c.course.schedule);
@@ -54,11 +59,12 @@ console.log("Starting testing..")
 
 // Util tests
 // testCapitalize();
+testGetString();
 
 
 // API tests
 // test_getCourseInfo();
 // test_getCourse();
 // test_checkCourse();
-test_getCourses();
+// test_getCourses();
 

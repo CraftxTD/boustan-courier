@@ -41,6 +41,7 @@ for (const folder of commandFolders) {
   }
 }
 
+
 client.on('messageCreate', async (message) => {
   if (message.author.bot) {
     return;
@@ -51,6 +52,13 @@ client.on('messageCreate', async (message) => {
     let num = utils.getRandomInt(0, 9);
     console.log("Called:", num);
     message.reply(event.greet());
+  }
+
+  // COMP 310
+  if (message.channel.id === "1545077247885443093") {
+    if (utils.findString(message.content, "—", 100)) {
+      message.channel.send("Megabytes of it.")
+    }
   }
 
   // find listdle images and spoiler them, delete the previous message.

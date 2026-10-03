@@ -89,6 +89,14 @@ function toLowerCase(str) {
 function findString(text, word, limit) {
   text = text.toLowerCase();
   let length = Math.min(limit, text.length);
+  if (word.length < 2) {
+    for (let i = 0; i < length; i++) {
+      if (text[i] === word) {
+        return true;
+      }
+    }
+    return false;
+  }
   for (let i = 0; i < length; i++) {
     if (word.startsWith(text[i])) {
       i++;
