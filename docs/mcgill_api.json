@@ -1,0 +1,2477 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "mcgill.courses",
+    "description": "A course search and review platform for McGill University.",
+    "license": {
+      "name": ""
+    },
+    "version": "0.0.0"
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "paths": {
+    "/auth/authorized": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "description": "Complete the Microsoft OAuth flow and establish a session for the authenticated user.",
+        "operationId": "login_authorized",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "description": "Authorization code issued by Microsoft.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "Opaque state returned by Microsoft and used for redirect validation.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Redirect to the original post-login location."
+          },
+          "500": {
+            "description": "Failed to exchange the authorization code or create the session.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "description": "Redirect the requester to initiate the Microsoft OAuth flow.",
+        "operationId": "microsoft_auth",
+        "parameters": [
+          {
+            "name": "redirect",
+            "in": "query",
+            "description": "Absolute URL to send the user back to after sign-in completes.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Redirect to the Microsoft login page."
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "description": "Invalidate the current session and redirect the user back to the client.",
+        "operationId": "logout",
+        "parameters": [
+          {
+            "name": "redirect",
+            "in": "query",
+            "description": "Absolute URL to send the user to after logout.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Redirect to the requested post-logout location."
+          },
+          "500": {
+            "description": "Failed to destroy the session.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course-averages": {
+      "get": {
+        "tags": [
+          "course-averages"
+        ],
+        "description": "Get course grade averages by term.",
+        "operationId": "get_course_averages",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "description": "Filter by course ID.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "COMP202"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course averages.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CourseAverage"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/courses": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "description": "Get a list of courses with optional filtering.",
+        "operationId": "get_courses",
+        "parameters": [
+          {
+            "name": "levels",
+            "in": "query",
+            "description": "Comma-separated list of course levels to filter by.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2,3,4"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of courses to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            },
+            "example": 20
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of courses to skip for pagination.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Search query string to filter courses by title, description, or ID.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "algorithms"
+          },
+          {
+            "name": "sortReverse",
+            "in": "query",
+            "description": "Whether to reverse the sort order. When true, sorts descending (highest first).",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "sortType",
+            "in": "query",
+            "description": "Field to sort results by.",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/CourseSortType"
+            }
+          },
+          {
+            "name": "subjects",
+            "in": "query",
+            "description": "Comma-separated list of subject codes to filter by.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "COMP,MATH"
+          },
+          {
+            "name": "terms",
+            "in": "query",
+            "description": "Comma-separated list of terms to filter by.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Fall 2024,Winter 2025"
+          },
+          {
+            "name": "with_course_count",
+            "in": "query",
+            "description": "Whether to include the total course count in the response.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Information about many courses.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCoursesPayload"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/courses/{id}": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "description": "Get information about a specific course by its ID.",
+        "operationId": "get_course_by_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Course ID in the format {SUBJECT}{CODE} (e.g., COMP202, MATH240). Case-insensitive.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "COMP202"
+          },
+          {
+            "name": "with_averages",
+            "in": "query",
+            "description": "Whether to include grade averages in the response.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "with_reviews",
+            "in": "query",
+            "description": "Whether to include reviews in the response. Reviews are sorted by timestamp, newest first.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course found and returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseByIdPayload"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No course exists with the given ID."
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instructors/{name}": {
+      "get": {
+        "tags": [
+          "instructors"
+        ],
+        "description": "Get information about an instructor along with their reviews.",
+        "operationId": "get_instructor",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Instructor name to retrieve information for.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instructor information with associated reviews.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInstructorPayload"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/interactions": {
+      "get": {
+        "tags": [
+          "interactions"
+        ],
+        "description": "Retrieve the authenticated user's interaction kind for a review.",
+        "operationId": "get_interaction_kind",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "description": "Course ID to get the interaction for.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "description": "User ID of the review author.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated user's interaction kind for the requested review.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInteractionKindPayload"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "interactions"
+        ],
+        "description": "Record a new interaction for a course.",
+        "operationId": "add_interaction",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddInteractionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Interaction recorded successfully."
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "interactions"
+        ],
+        "description": "Remove an interaction for a course.",
+        "operationId": "delete_interaction",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteInteractionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Interaction removed successfully."
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      }
+    },
+    "/interactions/{course_id}": {
+      "get": {
+        "tags": [
+          "interactions"
+        ],
+        "description": "Get the authenticated user's interactions for a course.",
+        "operationId": "get_user_interactions_for_course",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "description": "Course ID to get interactions for.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated user's interactions for the requested course.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserInteractionForCoursePayload"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      }
+    },
+    "/notifications": {
+      "get": {
+        "tags": [
+          "notifications"
+        ],
+        "description": "Get the current user's notifications. Returns notifications for reviews on courses the user is subscribed to, sorted by most recent first. Requires authentication.",
+        "operationId": "get_notifications",
+        "responses": {
+          "200": {
+            "description": "Notifications for the authenticated user, sorted by recency.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Notification"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User is not authenticated.",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "notifications"
+        ],
+        "description": "Mark a notification as seen or unseen. The notification is identified by the course ID and the ID of the user who created the review. Requires authentication.",
+        "operationId": "update_notification",
+        "requestBody": {
+          "description": "Notification identifier and the new seen status.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Notification updated successfully."
+          },
+          "401": {
+            "description": "User is not authenticated.",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "notifications"
+        ],
+        "description": "Delete a notification for the current user. The notification is identified by the course ID and the ID of the user who created the review. Requires authentication.",
+        "operationId": "delete_notification",
+        "requestBody": {
+          "description": "Notification identifier specifying which notification to delete.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteNotificationBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Notification deleted successfully."
+          },
+          "401": {
+            "description": "User is not authenticated.",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      }
+    },
+    "/reviews": {
+      "get": {
+        "tags": [
+          "reviews"
+        ],
+        "description": "Get a list of reviews with optional filtering by course, instructor, or user.",
+        "operationId": "get_reviews",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "description": "Course ID to filter reviews by (e.g., COMP202).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "COMP202"
+          },
+          {
+            "name": "instructor_name",
+            "in": "query",
+            "description": "Instructor name to filter reviews by. Must match exactly.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Jonathan Campbell"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of reviews to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            },
+            "example": 20
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of reviews to skip for pagination.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "sorted",
+            "in": "query",
+            "description": "Whether to sort reviews by timestamp (newest first).",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "description": "User ID to filter reviews by.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "with_user_count",
+            "in": "query",
+            "description": "Whether to include the count of unique users who have submitted reviews.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reviews matching the filter criteria.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetReviewsPayload"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "reviews"
+        ],
+        "description": "Update an existing review for a course. The review is identified by the authenticated user's ID and the course ID. Updates the timestamp and associated notifications.",
+        "operationId": "update_review",
+        "requestBody": {
+          "description": "Updated review data. All fields are required even if unchanged.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOrUpdateReviewBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Review updated successfully."
+          },
+          "401": {
+            "description": "User is not authenticated.",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "reviews"
+        ],
+        "description": "Add a new review for a course. A user can only have one review per course. Instructors must be valid for the course or 'Other'. Creates notifications for users subscribed to the course.",
+        "operationId": "add_review",
+        "requestBody": {
+          "description": "Review data including course ID, rating, difficulty, instructors, and content.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOrUpdateReviewBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Review added successfully."
+          },
+          "401": {
+            "description": "User is not authenticated.",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "reviews"
+        ],
+        "description": "Delete a review for a specific course. Also removes all associated interactions (likes) and notifications. The review is identified by the authenticated user's ID and the course ID.",
+        "operationId": "delete_review",
+        "requestBody": {
+          "description": "The course ID of the review to delete.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteReviewBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Review and associated data deleted successfully."
+          },
+          "401": {
+            "description": "User is not authenticated.",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      }
+    },
+    "/reviews/liked": {
+      "get": {
+        "tags": [
+          "reviews"
+        ],
+        "description": "Get all reviews that the authenticated user has liked. Returns a list of full review objects. Requires authentication.",
+        "operationId": "get_liked_reviews",
+        "responses": {
+          "200": {
+            "description": "Reviews liked by the authenticated user. The unique_user_count field is always null for this endpoint.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetReviewsPayload"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User is not authenticated.",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      }
+    },
+    "/reviews/{id}": {
+      "get": {
+        "tags": [
+          "reviews"
+        ],
+        "description": "Get a specific review by its unique identifier. The review includes interaction data (likes) specific to the authenticated user.",
+        "operationId": "get_review",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Unique review identifier. This is a MongoDB ObjectId string.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "507f1f77bcf86cd799439011"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested review with user-specific interaction data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User is not authenticated.",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "404": {
+            "description": "Review with the specified ID was not found.",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      }
+    },
+    "/search": {
+      "get": {
+        "tags": [
+          "search"
+        ],
+        "description": "Search for courses and instructors matching a query.",
+        "operationId": "search",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "The search query string.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results for courses and instructors.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResults"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions": {
+      "get": {
+        "tags": [
+          "subscriptions"
+        ],
+        "description": "Get all subscriptions for the authenticated user.",
+        "operationId": "get_subscriptions",
+        "responses": {
+          "200": {
+            "description": "List of subscriptions for the user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Subscription"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "subscriptions"
+        ],
+        "description": "Add a subscription for the authenticated user.",
+        "operationId": "add_subscription",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOrDeleteSubscriptionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Subscription created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "subscriptions"
+        ],
+        "description": "Delete a subscription for the authenticated user.",
+        "operationId": "delete_subscription",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOrDeleteSubscriptionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Subscription deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      }
+    },
+    "/subscriptions/{course_id}": {
+      "get": {
+        "tags": [
+          "subscriptions"
+        ],
+        "description": "Get a specific subscription for the authenticated user.",
+        "operationId": "get_subscription",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "description": "Course ID to fetch a subscription for.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested subscription, or `null` if not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Subscription"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "microsoftOAuth": [
+              "User.Read"
+            ]
+          }
+        ]
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "Get information about the currently authenticated user, if any.",
+        "operationId": "get_user",
+        "responses": {
+          "200": {
+            "description": "Authenticated user details or `null` when the requester is not signed in.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddInteractionBody": {
+        "type": "object",
+        "required": [
+          "kind",
+          "course_id",
+          "user_id"
+        ],
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "description": "Course ID the interaction is for."
+          },
+          "kind": {
+            "$ref": "#/components/schemas/InteractionKind",
+            "description": "Kind of interaction to record."
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID of the review author."
+          }
+        }
+      },
+      "AddOrDeleteSubscriptionBody": {
+        "type": "object",
+        "required": [
+          "course_id"
+        ],
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "description": "Course ID to subscribe to or unsubscribe from."
+          }
+        }
+      },
+      "AddOrUpdateReviewBody": {
+        "type": "object",
+        "required": [
+          "content",
+          "course_id",
+          "instructors",
+          "rating",
+          "difficulty"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "The review content/text."
+          },
+          "course_id": {
+            "type": "string",
+            "description": "Course ID this review is for."
+          },
+          "difficulty": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Difficulty rating out of 5 (1-5).",
+            "minimum": 0
+          },
+          "instructors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of instructor names for this review."
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Rating out of 5 (1-5).",
+            "minimum": 0
+          }
+        }
+      },
+      "Block": {
+        "type": "object",
+        "properties": {
+          "campus": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Campus code or name for the block."
+          },
+          "crn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Course reference number for the block."
+          },
+          "display": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Display string for the block."
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Location string for the block."
+          },
+          "timeblocks": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/TimeBlock"
+            },
+            "description": "Time blocks associated with this block."
+          }
+        }
+      },
+      "Course": {
+        "type": "object",
+        "required": [
+          "_id",
+          "title",
+          "credits",
+          "subject",
+          "code",
+          "url",
+          "department",
+          "faculty",
+          "terms",
+          "description",
+          "instructors",
+          "prerequisites",
+          "corequisites",
+          "leadingTo"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Unique course identifier."
+          },
+          "avgDifficulty": {
+            "type": "number",
+            "format": "float",
+            "description": "Average difficulty across reviews."
+          },
+          "avgRating": {
+            "type": "number",
+            "format": "float",
+            "description": "Average rating across reviews."
+          },
+          "code": {
+            "type": "string",
+            "description": "Course number (e.g., \"202\")."
+          },
+          "corequisites": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of corequisite course codes."
+          },
+          "corequisitesText": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Raw corequisites text from the catalog."
+          },
+          "credits": {
+            "type": "string",
+            "description": "Credit value as listed in the catalog."
+          },
+          "department": {
+            "type": "string",
+            "description": "Department offering the course."
+          },
+          "description": {
+            "type": "string",
+            "description": "Course description."
+          },
+          "faculty": {
+            "type": "string",
+            "description": "Faculty offering the course."
+          },
+          "idNgrams": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Search n-grams for the course ID."
+          },
+          "instructors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Instructor"
+            },
+            "description": "Instructors associated with the course."
+          },
+          "leadingTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Course codes that list this course as a prerequisite."
+          },
+          "logicalCorequisites": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RequirementNode",
+                "description": "Structured corequisites expression."
+              }
+            ]
+          },
+          "logicalPrerequisites": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RequirementNode",
+                "description": "Structured prerequisites expression."
+              }
+            ]
+          },
+          "prerequisites": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of prerequisite course codes."
+          },
+          "prerequisitesText": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Raw prerequisites text from the catalog."
+          },
+          "restrictions": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Restriction text from the catalog."
+          },
+          "reviewCount": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of reviews for the course."
+          },
+          "schedule": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/Schedule"
+            },
+            "description": "Schedule offerings for the course."
+          },
+          "subject": {
+            "type": "string",
+            "description": "Subject code (e.g., \"COMP\")."
+          },
+          "terms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Terms when the course is offered."
+          },
+          "title": {
+            "type": "string",
+            "description": "Course title."
+          },
+          "titleNgrams": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Search n-grams for the course title."
+          },
+          "url": {
+            "type": "string",
+            "description": "Catalog URL for the course."
+          }
+        }
+      },
+      "CourseAverage": {
+        "type": "object",
+        "required": [
+          "courseId",
+          "term",
+          "average"
+        ],
+        "properties": {
+          "average": {
+            "$ref": "#/components/schemas/Grade",
+            "description": "Letter grade average."
+          },
+          "courseId": {
+            "type": "string",
+            "description": "Course identifier (e.g., \"COMP202\")."
+          },
+          "term": {
+            "type": "string",
+            "description": "Term name (e.g., \"Fall 2024\", \"Winter 2025\")."
+          }
+        }
+      },
+      "CourseFilter": {
+        "type": "object",
+        "properties": {
+          "levels": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Course levels to filter by (e.g., \"1\", \"2\", \"3\")."
+          },
+          "query": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Search query string."
+          },
+          "sortReverse": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether to reverse the sort order."
+          },
+          "sortType": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CourseSortType",
+                "description": "Sort type for ordering results."
+              }
+            ]
+          },
+          "subjects": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Subject codes to filter by (e.g., \"COMP\", \"MATH\")."
+          },
+          "terms": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Term identifiers to filter by (e.g., \"Fall 2024\")."
+          }
+        }
+      },
+      "CourseSortType": {
+        "type": "string",
+        "enum": [
+          "difficulty",
+          "rating",
+          "reviewCount"
+        ]
+      },
+      "DateTime": {
+        "type": "string",
+        "description": "Unix timestamp in milliseconds, encoded as a decimal string",
+        "examples": [
+          "1672531200000"
+        ],
+        "pattern": "^-?\\d+$"
+      },
+      "DeleteInteractionBody": {
+        "type": "object",
+        "required": [
+          "course_id",
+          "user_id"
+        ],
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "description": "Course ID the interaction belongs to."
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID of the review author."
+          }
+        }
+      },
+      "DeleteNotificationBody": {
+        "type": "object",
+        "required": [
+          "course_id",
+          "user_id"
+        ],
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "description": "Identifier of the course whose notification should be removed."
+          },
+          "user_id": {
+            "type": "string",
+            "description": "Identifier of the user who created the notification's review."
+          }
+        }
+      },
+      "DeleteReviewBody": {
+        "type": "object",
+        "required": [
+          "course_id"
+        ],
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "description": "Course ID to delete the review for."
+          }
+        }
+      },
+      "GetCourseAveragesParams": {
+        "type": "object",
+        "properties": {
+          "course_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "GetCourseByIdParams": {
+        "type": "object",
+        "properties": {
+          "with_averages": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether to include course averages in the response."
+          },
+          "with_reviews": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether to include reviews in the response."
+          }
+        }
+      },
+      "GetCourseByIdPayload": {
+        "type": "object",
+        "required": [
+          "course",
+          "courseAverages",
+          "reviews"
+        ],
+        "properties": {
+          "course": {
+            "$ref": "#/components/schemas/Course",
+            "description": "The course information."
+          },
+          "courseAverages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CourseAverage"
+            },
+            "description": "Grade averages for the course by term."
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            },
+            "description": "Reviews for the course (sorted by timestamp, newest first)."
+          }
+        }
+      },
+      "GetCoursesParams": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CourseFilter",
+            "description": "Filter criteria for courses."
+          },
+          {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Maximum number of courses to return."
+              },
+              "offset": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Number of courses to skip for pagination.",
+                "minimum": 0
+              },
+              "with_course_count": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Whether to include the total course count in the response."
+              }
+            }
+          }
+        ]
+      },
+      "GetCoursesPayload": {
+        "type": "object",
+        "required": [
+          "courses"
+        ],
+        "properties": {
+          "courseCount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Total number of courses available (if requested).",
+            "minimum": 0
+          },
+          "courses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Course"
+            },
+            "description": "List of courses matching the query."
+          }
+        }
+      },
+      "GetInstructorPayload": {
+        "type": "object",
+        "required": [
+          "reviews",
+          "courses"
+        ],
+        "properties": {
+          "courses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Course"
+            },
+            "description": "Courses taught by the instructor."
+          },
+          "instructor": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Instructor",
+                "description": "Instructor matching the requested name, if found."
+              }
+            ]
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            },
+            "description": "Reviews associated with the instructor sorted by newest first."
+          }
+        }
+      },
+      "GetInteractionKindParams": {
+        "type": "object",
+        "required": [
+          "course_id",
+          "user_id"
+        ],
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "description": "Course ID to get the interaction for."
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID of the review author."
+          }
+        }
+      },
+      "GetInteractionKindPayload": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/InteractionKind",
+                "description": "Interaction the user has taken for this course and referrer, if any."
+              }
+            ]
+          }
+        }
+      },
+      "GetReviewsParams": {
+        "type": "object",
+        "properties": {
+          "course_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Course ID to filter reviews by."
+          },
+          "instructor_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Instructor name to filter reviews by."
+          },
+          "limit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Maximum number of reviews to return."
+          },
+          "offset": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Number of reviews to skip.",
+            "minimum": 0
+          },
+          "sorted": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether to sort reviews by timestamp (newest first)."
+          },
+          "user_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "User ID to filter reviews by."
+          },
+          "with_user_count": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether to include the unique user count in the response."
+          }
+        }
+      },
+      "GetReviewsPayload": {
+        "type": "object",
+        "required": [
+          "reviews"
+        ],
+        "properties": {
+          "reviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            },
+            "description": "List of reviews matching the query."
+          },
+          "uniqueUserCount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Number of unique users who have submitted reviews (if requested).",
+            "minimum": 0
+          }
+        }
+      },
+      "GetUserInteractionForCoursePayload": {
+        "type": "object",
+        "required": [
+          "course_id",
+          "referrer",
+          "interactions"
+        ],
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "description": "Course ID the interactions belong to."
+          },
+          "interactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Interaction"
+            },
+            "description": "Authenticated user's interactions for the course."
+          },
+          "referrer": {
+            "type": "string",
+            "description": "Authenticated user ID the interactions belong to."
+          }
+        }
+      },
+      "Grade": {
+        "type": "string",
+        "enum": [
+          "A",
+          "A-",
+          "B+",
+          "B",
+          "B-",
+          "C+",
+          "C",
+          "C-",
+          "D",
+          "F"
+        ]
+      },
+      "Instructor": {
+        "type": "object",
+        "required": [
+          "name",
+          "term"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Instructor display name."
+          },
+          "nameNgrams": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Search n-grams for the instructor name."
+          },
+          "term": {
+            "type": "string",
+            "description": "Term identifier for the instructor record."
+          }
+        }
+      },
+      "Interaction": {
+        "type": "object",
+        "required": [
+          "kind",
+          "userId",
+          "courseId",
+          "referrer"
+        ],
+        "properties": {
+          "courseId": {
+            "type": "string",
+            "description": "ID of the course the interaction belongs to."
+          },
+          "kind": {
+            "$ref": "#/components/schemas/InteractionKind",
+            "description": "Kind of interaction that occurred."
+          },
+          "referrer": {
+            "type": "string",
+            "description": "ID of the user who created the interaction."
+          },
+          "userId": {
+            "type": "string",
+            "description": "ID of the user associated with the interaction."
+          }
+        }
+      },
+      "InteractionKind": {
+        "type": "string",
+        "enum": [
+          "like",
+          "dislike"
+        ]
+      },
+      "Notification": {
+        "type": "object",
+        "required": [
+          "review",
+          "seen",
+          "userId"
+        ],
+        "properties": {
+          "review": {
+            "$ref": "#/components/schemas/Review",
+            "description": "Review that triggered the notification."
+          },
+          "seen": {
+            "type": "boolean",
+            "description": "Whether the notification has been seen."
+          },
+          "userId": {
+            "type": "string",
+            "description": "User ID associated with the notification."
+          }
+        }
+      },
+      "RequirementNode": {
+        "oneOf": [
+          {
+            "type": "object",
+            "description": "A single course code requirement.",
+            "required": [
+              "data",
+              "type"
+            ],
+            "properties": {
+              "data": {
+                "type": "string",
+                "description": "A single course code requirement."
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "course"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "A group of requirement nodes combined by an operator.",
+            "required": [
+              "data",
+              "type"
+            ],
+            "properties": {
+              "data": {
+                "type": "object",
+                "description": "A group of requirement nodes combined by an operator.",
+                "required": [
+                  "operator",
+                  "groups"
+                ],
+                "properties": {
+                  "groups": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/RequirementNode"
+                    },
+                    "description": "Child requirement nodes in the group."
+                  },
+                  "operator": {
+                    "$ref": "#/components/schemas/Operator",
+                    "description": "Operator used to combine the child nodes."
+                  }
+                }
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "group"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "Review": {
+        "type": "object",
+        "required": [
+          "content",
+          "courseId",
+          "difficulty",
+          "instructors",
+          "likes",
+          "rating",
+          "timestamp",
+          "userId"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "The text content of the review."
+          },
+          "courseId": {
+            "type": "string",
+            "description": "The course ID this review is for."
+          },
+          "difficulty": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Difficulty rating from 1-5.",
+            "minimum": 0
+          },
+          "instructors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of instructor names for this review."
+          },
+          "likes": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of likes (net of dislikes) this review has received."
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Overall rating from 1-5.",
+            "minimum": 0
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/DateTime",
+            "description": "Timestamp when the review was created or last updated."
+          },
+          "userId": {
+            "type": "string",
+            "description": "The user ID of the review author."
+          }
+        }
+      },
+      "Schedule": {
+        "type": "object",
+        "properties": {
+          "blocks": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/Block"
+            },
+            "description": "Schedule blocks for the term."
+          },
+          "term": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Term identifier for the schedule."
+          }
+        }
+      },
+      "SearchParams": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query string to match against courses and instructors."
+          }
+        }
+      },
+      "SearchResults": {
+        "type": "object",
+        "required": [
+          "courses",
+          "instructors"
+        ],
+        "properties": {
+          "courses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Course"
+            },
+            "description": "Courses that match the search query ordered by relevance."
+          },
+          "instructors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Instructor"
+            },
+            "description": "Instructors that match the search query ordered by relevance."
+          }
+        }
+      },
+      "Subscription": {
+        "type": "object",
+        "required": [
+          "courseId",
+          "userId"
+        ],
+        "properties": {
+          "courseId": {
+            "type": "string",
+            "description": "Course ID the user is subscribed to."
+          },
+          "userId": {
+            "type": "string",
+            "description": "User ID that owns the subscription."
+          }
+        }
+      },
+      "TimeBlock": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Day of week for the time block."
+          },
+          "t1": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Start time value for the block."
+          },
+          "t2": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "End time value for the block."
+          }
+        }
+      },
+      "UpdateNotificationBody": {
+        "type": "object",
+        "required": [
+          "course_id",
+          "creator_id",
+          "seen"
+        ],
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "description": "Identifier of the course associated with the notification."
+          },
+          "creator_id": {
+            "type": "string",
+            "description": "Identifier of the user who created the notification's review."
+          },
+          "seen": {
+            "type": "boolean",
+            "description": "Whether the notification has been marked as seen."
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "id",
+          "mail"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Microsoft Graph user identifier."
+          },
+          "mail": {
+            "type": "string",
+            "description": "Primary email address associated with the user."
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/User",
+                "description": "Authenticated user information when available."
+              }
+            ]
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "microsoftOAuth": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://login.microsoftonline.com/cd319671-52e7-4a68-afa9-fcf8f89f09ea/oauth2/v2.0/authorize",
+            "tokenUrl": "https://login.microsoftonline.com/cd319671-52e7-4a68-afa9-fcf8f89f09ea/oauth2/v2.0/token",
+            "scopes": {
+              "User.Read": "Read basic Microsoft user profile information.",
+              "openid": "Authenticate with Microsoft."
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "All authentication related endpoints."
+    },
+    {
+      "name": "course-averages",
+      "description": "All course average related endpoints."
+    },
+    {
+      "name": "courses",
+      "description": "All course related endpoints."
+    },
+    {
+      "name": "instructors",
+      "description": "All instructor related endpoints."
+    },
+    {
+      "name": "interactions",
+      "description": "All interaction related endpoints."
+    },
+    {
+      "name": "notifications",
+      "description": "All notification related endpoints."
+    },
+    {
+      "name": "reviews",
+      "description": "All review related endpoints."
+    },
+    {
+      "name": "search",
+      "description": "All search related endpoints."
+    },
+    {
+      "name": "subscriptions",
+      "description": "All subscription related endpoints."
+    },
+    {
+      "name": "user",
+      "description": "All user related endpoints."
+    }
+  ]
+}

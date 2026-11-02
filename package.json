@@ -1,17 +1,33 @@
 {
   "name": "boustan-courier",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Discord Utility Bot for setting up McGill Course Roles in Discord",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node src/tests/api_getters.js",
+    "deploy": "node src/deploy_commands.js"
   },
   "keywords": [],
   "author": "CraftxTD",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "chroma-js": "^3.2.0",
     "discord.js": "^14.27.0",
     "dotenv": "^17.4.2"
-  }
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CraftxTD/boustan-courier.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CraftxTD/boustan-courier/issues"
+  },
+  "homepage": "https://github.com/CraftxTD/boustan-courier#readme"
 }

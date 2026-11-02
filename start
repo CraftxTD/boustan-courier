@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# To use, execute this command when setting up a new systemmd (Linux) / sysrc (FreeBSD) service.
+
+TERM=xterm-256color /usr/local/bin/tmux new-session -s discordbot 'cd /root/boustan-courier/; nodemon; bash'
