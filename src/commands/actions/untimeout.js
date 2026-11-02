@@ -4,7 +4,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('untimeout')
     .setDescription('Remove timeout from someone else')
-    .addUserOption((user) =>
+    .addUserOption(option =>
       option
         .setName('target')
         .setDescription('User to un-timeout')
