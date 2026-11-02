@@ -12,10 +12,12 @@ module.exports = {
     ),
   async execute(interaction) {
     const duration = interaction.options.getNumber('duration');
+    const response = `You did this to yourself`
     const guildMember = interaction.member;
     guildMember
-      .timeout(duration * 60 * 1000, 'You did this to yourself')
+      .timeout(duration * 60 * 1000, response)
       .then(console.log)
-      .catch(console.error);
+      .catch(console.error(`Bot doesn't have permission to timeout user.`));
+    await interaction.reply(response)
   },
 };

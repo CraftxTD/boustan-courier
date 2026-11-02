@@ -11,7 +11,7 @@ module.exports = {
         .setRequired(true),
     ),
   async execute(interaction) {
-    const target = interaction.options.getUser('target').member;
+    const target = interaction.options.getMember('target').member;
     const editOptions = {
       communicationDisabledUntil: null,
     };
