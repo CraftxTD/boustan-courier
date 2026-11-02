@@ -15,7 +15,11 @@ module.exports = {
     const editOptions = {
       communicationDisabledUntil: null,
     };
-    target.edit(editOptions);
+    try {
+      target.edit(editOptions);
+    } catch (error) {
+      await interaction.reply(`This user does not have a timeout.`);
+    }
     await interaction.reply(`Removed ${member.user.displayName}'s timeout`)
   },
 };
