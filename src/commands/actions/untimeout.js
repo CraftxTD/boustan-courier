@@ -16,5 +16,6 @@ module.exports = {
       communicationDisabledUntil: null,
     };
     target.edit(editOptions);
+    await interaction.reply(`Removed ${member.user.displayName}'s timeout`)
   },
 };
