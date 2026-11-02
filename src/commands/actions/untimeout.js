@@ -20,6 +20,6 @@ module.exports = {
     } catch (error) {
       await interaction.reply(`This user does not have a timeout.`);
     }
-    await interaction.reply(`Removed ${member.user.displayName}'s timeout`)
+    await interaction.reply(`Removed ${member.displayName}'s timeout`)
   },
 };
