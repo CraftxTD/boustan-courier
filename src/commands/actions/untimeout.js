@@ -15,6 +15,11 @@ module.exports = {
     const editOptions = {
       communicationDisabledUntil: null,
     };
+    const isTimedOut = (target.communicationDisabledUntil != null);
+    if (!isTimedOut) {
+      await interaction.reply(`This user does not have a timeout.`);
+      return;
+    }
     try {
       target.edit(editOptions);
     } catch (error) {
