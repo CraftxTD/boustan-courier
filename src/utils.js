@@ -38,7 +38,7 @@ const COURSES = Object.freeze({
   ISLA: { id: "ISLA", color: "#f20cd1" },
   FREN: { id: "FREN", color: "#f20c6f" },
   ANTH: { id: "ANTH", color: "#f20c0c" },
-  GEOG: { id: "GEOG", color: "#f20c89" },
+  ECSE: { id: "ECSE", color: "#f20c89" },
 })
 
 /**
