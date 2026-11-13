@@ -98,6 +98,10 @@ async function copycatMessage(message, messageContent) {
     .then(console.log(`Copied user's avatar and name`))
     .catch(console.error);
 
+  const threadId = message.channel.isThread() ? message.channel.id : null;
+  if (threadId) {
+    messageContent = Object.assign(message, threadId);
+  }
 
   await webhook.send(messageContent);
 
