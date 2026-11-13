@@ -52,7 +52,8 @@ client.on('messageCreate', async (message) => {
     try {
       const newContent = message.content.replace(/estrogen/g, "celestrogen");
       console.log("CopyCat triggered!");
-      await event.copycatMessage(message, {content: newContent});
+      await event.copycatMessage(message, { content: newContent });
+      await message.delete();
     } catch (error) {
       console.error("Error copying message:", error);
     }
