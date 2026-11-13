@@ -47,6 +47,17 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
+  // replace estrogen with celestrogen
+  if (message.content.includes("estrogen")) {
+    try {
+      const newContent = message.content.replace(/estrogen/g, "celestrogen");
+      console.log("CopyCat triggered!");
+      await event.copycatMessage(message, {content: newContent});
+    } catch (error) {
+      console.error("Error copying message:", error);
+    }
+  }
+
   // greet if called
   if (utils.findString(message.content, "courier", 100)) {
     let num = utils.getRandomInt(0, 9);
